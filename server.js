@@ -1,9 +1,18 @@
 // Require the framework and instantiate it
-const fastify = require('fastify')({ logger: true })
+import Fastify from 'fastify'
+import * as dotenv from 'dotenv'
+import { WebClient } from '@slack/web-api'
+
+//
+dotenv.config()
+
+const fastify = Fastify({
+  logger: true,
+})
 
 // Declare a route
-fastify.post('/', async (request, reply) => {
-  return { hello: 'world' }
+fastify.get('/', async (request, reply) => {
+  return { areYou: process.env.READ_THIS }
 })
 
 // Run the server!
