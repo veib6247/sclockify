@@ -22,6 +22,8 @@ fastify.post('/', async (request, reply) => {
   const payloadFromSlack = JSON.parse(decodeURIComponent(request.body.payload))
   console.log(`Fetching data from user ${payloadFromSlack.user.id}`)
 
+  const callbackId = payloadFromSlack.callback_id
+
   // todo: fetch user info from slack
   // Initialize slack bot
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
@@ -33,8 +35,10 @@ fastify.post('/', async (request, reply) => {
       user: payloadFromSlack.user.id,
     })
 
-    console.log(result.profile)
+    console.log({ userName: result.profile.real_name, callback: callbackId })
     slackUser = result.profile.real_name
+
+    //
   } catch (error) {
     console.error(error)
   }
@@ -46,7 +50,9 @@ fastify.post('/', async (request, reply) => {
       text: `${slackUser} has clocked in.`,
     })
 
-    console.log(result)
+    if (result.ok) {
+      console.log('Msg Sent!')
+    }
 
     //
   } catch (error) {
