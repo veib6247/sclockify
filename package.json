@@ -1,0 +1,14 @@
+{
+  "name": "s-clockin-fy",
+  "version": "1.0.0",
+  "description": "Bundy clock via slack, lol",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fastify": "^4.18.0"
+  }
+}
