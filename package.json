@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@fastify/formbody": "^7.4.0",
     "@slack/web-api": "^6.8.1",
     "dotenv": "^16.1.4",
     "fastify": "^4.18.0"

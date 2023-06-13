@@ -1,6 +1,7 @@
 // Require the framework and instantiate it
 import Fastify from 'fastify'
 import * as dotenv from 'dotenv'
+import * as formbody from '@fastify/formbody'
 import { WebClient } from '@slack/web-api'
 
 //
@@ -10,12 +11,54 @@ const fastify = Fastify({
   logger: true,
 })
 
-// Declare a route
+// parse application/x-www-form-urlencoded
+fastify.register(formbody)
+
+/**
+ * Declare a route
+ */
 fastify.post('/', async (request, reply) => {
-  console.log(request.body)
+  // todo: decode to JSON
+  const payloadFromSlack = JSON.parse(decodeURIComponent(request.body.payload))
+  console.log(`Fetching data from user ${payloadFromSlack.user.id}`)
+
+  // todo: fetch user info from slack
+  // Initialize slack bot
+  const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
+  let slackUser = ''
+
+  // fetch data of the user that used the shortcut
+  try {
+    const result = await slack.users.profile.get({
+      user: payloadFromSlack.user.id,
+    })
+
+    console.log(result.profile)
+    slackUser = result.profile.real_name
+  } catch (error) {
+    console.error(error)
+  }
+
+  // actually submit a msg to the channel
+  try {
+    const result = await slack.chat.postMessage({
+      channel: process.env.SLACK_CHANNEL_ID,
+      text: `${slackUser} has clocked in.`,
+    })
+
+    console.log(result)
+
+    //
+  } catch (error) {
+    console.error(error)
+  }
+
+  reply.send(`hello ${slackUser}`)
 })
 
-// Run the server!
+/**
+ * Run the server!
+ */
 const start = async () => {
   try {
     // run on local mode
