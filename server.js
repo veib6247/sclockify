@@ -16,7 +16,7 @@ const fastify = Fastify({
 fastify.register(formbody)
 
 /**
- * Declare a route
+ * Declare home route
  */
 fastify.post('/', async (request, reply) => {
   // parse form to JSON
@@ -37,12 +37,6 @@ fastify.post('/', async (request, reply) => {
     },
   })
 
-  // build stamp
-  // const timeStamp = `${appendZero(convertedDate.getHours())}:${appendZero(
-  //   convertedDate.getMinutes()
-  // )}:${appendZero(convertedDate.getSeconds())}`
-  // const timeStamp = 'UNDER_CONSTRUCTION'
-
   // Initialize slack bot
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
   let slackUser = ''
@@ -58,6 +52,7 @@ fastify.post('/', async (request, reply) => {
       callback: callbackId,
       timeStamp: timeStamp,
     })
+
     slackUser = result.profile.real_name
 
     //
@@ -122,13 +117,11 @@ fastify.post('/', async (request, reply) => {
 })
 
 /**
- * helper function to format time
- * @param {number} time
- * @returns Formatted time
+ * 2nd route
  */
-const appendZero = (time) => {
-  return time < 10 ? `0${time}` : time
-}
+fastify.post('/command', async (request, reply) => {
+  reply.send(request.body)
+})
 
 /**
  * Run the server!
