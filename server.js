@@ -120,6 +120,7 @@ fastify.post('/', async (request, reply) => {
  * 2nd route
  */
 fastify.post('/command', async (request, reply) => {
+  console.log(request.body)
   reply.send(request.body)
 })
 
