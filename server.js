@@ -137,6 +137,7 @@ const start = async () => {
   try {
     // run on local mode
     if (process.env.SERVER_MODE === 'TEST') {
+      console.log(`NODE_ENV is '${process.env.NODE_ENV}'`)
       console.log('Server running in DEV mode')
       await fastify.listen({ port: 3000 })
     } else {
