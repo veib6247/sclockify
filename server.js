@@ -3,6 +3,7 @@ import Fastify from 'fastify'
 import * as dotenv from 'dotenv'
 import * as formbody from '@fastify/formbody'
 import { WebClient } from '@slack/web-api'
+import moment from 'moment-timezone'
 
 //
 dotenv.config()
@@ -24,11 +25,14 @@ fastify.post('/', async (request, reply) => {
 
   const callbackId = payloadFromSlack.callback_id
 
-  // calc time
+  // calc time, convert to correct timezone before pushing to log
   const today = new Date()
-  const timeStamp = `${appendZero(today.getHours())}:${appendZero(
-    today.getMinutes()
-  )}:${appendZero(today.getSeconds())}`
+  const convertedDate = new Date(moment.tz(today, 'Asia/Taipei').format())
+
+  // build stamp
+  const timeStamp = `${appendZero(convertedDate.getHours())}:${appendZero(
+    convertedDate.getMinutes()
+  )}:${appendZero(convertedDate.getSeconds())}`
 
   // Initialize slack bot
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
