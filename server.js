@@ -23,16 +23,23 @@ fastify.post('/', async (request, reply) => {
   const payloadFromSlack = JSON.parse(decodeURIComponent(request.body.payload))
   console.log(`Fetching data from user ${payloadFromSlack.user.id}`)
 
+  // identifier for which shortcut was used
   const callbackId = payloadFromSlack.callback_id
 
   // calc time, convert to correct timezone before pushing to log
   const today = new Date()
-  const convertedDate = new Date(moment.tz(today, 'Asia/Taipei').format())
+  const convertedDate = new Date(moment.tz(today, 'Asia/Taipei').utc().format())
+
+  console.log({
+    today: today,
+    moment: convertedDate,
+  })
 
   // build stamp
   const timeStamp = `${appendZero(convertedDate.getHours())}:${appendZero(
     convertedDate.getMinutes()
   )}:${appendZero(convertedDate.getSeconds())}`
+  // const timeStamp = 'UNDER_CONSTRUCTION'
 
   // Initialize slack bot
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
