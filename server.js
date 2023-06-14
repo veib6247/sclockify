@@ -24,6 +24,12 @@ fastify.post('/', async (request, reply) => {
 
   const callbackId = payloadFromSlack.callback_id
 
+  // calc time
+  const today = new Date()
+  const timeStamp = `${appendZero(today.getHours())}:${appendZero(
+    today.getMinutes()
+  )}:${appendZero(today.getSeconds())}`
+
   // Initialize slack bot
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
   let slackUser = ''
@@ -34,7 +40,11 @@ fastify.post('/', async (request, reply) => {
       user: payloadFromSlack.user.id,
     })
 
-    console.log({ userName: result.profile.real_name, callback: callbackId })
+    console.log({
+      userName: result.profile.real_name,
+      callback: callbackId,
+      timeStamp: timeStamp,
+    })
     slackUser = result.profile.real_name
 
     //
@@ -46,6 +56,7 @@ fastify.post('/', async (request, reply) => {
   try {
     let commandContext = ''
 
+    // eval action
     switch (callbackId) {
       case 'clock_in':
         commandContext = 'clocked in'
@@ -78,7 +89,7 @@ fastify.post('/', async (request, reply) => {
 
     const result = await slack.chat.postMessage({
       channel: process.env.SLACK_CHANNEL_ID,
-      text: `${slackUser} has ${commandContext}`,
+      text: `${slackUser} has ${commandContext} - @${timeStamp}`,
     })
 
     if (result.ok) {
@@ -93,8 +104,18 @@ fastify.post('/', async (request, reply) => {
   reply.send({
     slackUser: slackUser,
     callbackId: callbackId,
+    timeStamp: timeStamp,
   })
 })
+
+/**
+ * helper function to format time
+ * @param {number} time
+ * @returns formatted time
+ */
+const appendZero = (time) => {
+  return time < 10 ? `0${time}` : time
+}
 
 /**
  * Run the server!
