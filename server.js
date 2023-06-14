@@ -18,13 +18,12 @@ fastify.register(formbody)
  * Declare a route
  */
 fastify.post('/', async (request, reply) => {
-  // todo: decode to JSON
+  // parse form to JSON
   const payloadFromSlack = JSON.parse(decodeURIComponent(request.body.payload))
   console.log(`Fetching data from user ${payloadFromSlack.user.id}`)
 
   const callbackId = payloadFromSlack.callback_id
 
-  // todo: fetch user info from slack
   // Initialize slack bot
   const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
   let slackUser = ''
@@ -45,13 +44,45 @@ fastify.post('/', async (request, reply) => {
 
   // actually submit a msg to the channel
   try {
+    let commandContext = ''
+
+    switch (callbackId) {
+      case 'clock_in':
+        commandContext = 'clocked in'
+        break
+
+      case 'clock_out':
+        commandContext = 'clocked out'
+        break
+
+      case 'break_15':
+        commandContext = 'taken a 15 minutes break'
+        break
+
+      case 'break_30':
+        commandContext = 'taken a 30 minutes break'
+        break
+
+      case 'lunch':
+        commandContext = 'taken a lunch break'
+        break
+
+      case 'extended_break':
+        commandContext = 'taken an extended break (1hr 30mins)'
+        break
+
+      default:
+        commandContext = 'broken the space-time continuum'
+        break
+    }
+
     const result = await slack.chat.postMessage({
       channel: process.env.SLACK_CHANNEL_ID,
-      text: `${slackUser} has clocked in.`,
+      text: `${slackUser} has ${commandContext}`,
     })
 
     if (result.ok) {
-      console.log('Msg Sent!')
+      console.log(`${slackUser} has ${commandContext}`)
     }
 
     //
