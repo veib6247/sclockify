@@ -134,15 +134,11 @@ const appendZero = (time) => {
  * Run the server!
  */
 const start = async () => {
-  console.log(`NODE_ENV is '${process.env.NODE_ENV}'`)
-
   try {
     // run on local mode
-    if (process.env.SERVER_MODE === 'TEST') {
-      console.log('Server running in DEV mode')
+    if (process.env.NODE_ENV === 'development') {
       await fastify.listen({ port: 3000 })
     } else {
-      console.log('Server running in PROD mode')
       // use port provided by railway when hosted
       fastify.listen({
         host: '0.0.0.0',
@@ -152,6 +148,8 @@ const start = async () => {
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
+  } finally {
+    console.log(`Server running in ${process.env.NODE_ENV} mode`)
   }
 }
 
