@@ -120,8 +120,14 @@ fastify.post('/', async (request, reply) => {
  * 2nd route
  */
 fastify.post('/command', async (request, reply) => {
-  console.log(request.body)
-  reply.send(request.body)
+  const logBlob = {
+    user: request.body.user_id,
+    command: request.body.command,
+    text: request.body.text,
+  }
+
+  console.log(logBlob)
+  reply.send(logBlob)
 })
 
 /**
