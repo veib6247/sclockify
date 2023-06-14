@@ -72,7 +72,7 @@ fastify.post('/', async (request, reply) => {
         break
 
       default:
-        commandContext = 'broken the space-time continuum'
+        commandContext = 'broken the Space-Time Continuum'
         break
     }
 
@@ -90,7 +90,10 @@ fastify.post('/', async (request, reply) => {
     console.error(error)
   }
 
-  reply.send(`hello ${slackUser}`)
+  reply.send({
+    slackUser: slackUser,
+    callbackId: callbackId,
+  })
 })
 
 /**
