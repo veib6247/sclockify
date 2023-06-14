@@ -28,17 +28,19 @@ fastify.post('/', async (request, reply) => {
 
   // calc time, convert to correct timezone before pushing to log
   const today = new Date()
-  const convertedDate = new Date(moment.tz(today, 'Asia/Taipei').utc().format())
+  const timeStamp = moment.tz(today, 'Asia/Taipei').toLocaleString()
 
   console.log({
-    today: today,
-    moment: convertedDate,
+    timezoneConversion: {
+      server: today.toLocaleString(),
+      moment: timeStamp,
+    },
   })
 
   // build stamp
-  const timeStamp = `${appendZero(convertedDate.getHours())}:${appendZero(
-    convertedDate.getMinutes()
-  )}:${appendZero(convertedDate.getSeconds())}`
+  // const timeStamp = `${appendZero(convertedDate.getHours())}:${appendZero(
+  //   convertedDate.getMinutes()
+  // )}:${appendZero(convertedDate.getSeconds())}`
   // const timeStamp = 'UNDER_CONSTRUCTION'
 
   // Initialize slack bot
@@ -100,7 +102,7 @@ fastify.post('/', async (request, reply) => {
 
     const result = await slack.chat.postMessage({
       channel: process.env.SLACK_CHANNEL_ID,
-      text: `${slackUser} has ${commandContext} - @${timeStamp}`,
+      text: `${slackUser} has ${commandContext} @ ${timeStamp}`,
     })
 
     if (result.ok) {
