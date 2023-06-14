@@ -111,7 +111,7 @@ fastify.post('/', async (request, reply) => {
 /**
  * helper function to format time
  * @param {number} time
- * @returns formatted time
+ * @returns Formatted time
  */
 const appendZero = (time) => {
   return time < 10 ? `0${time}` : time
