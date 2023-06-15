@@ -1,11 +1,13 @@
 import Fastify from 'fastify'
 import * as dotenv from 'dotenv'
 import * as formbody from '@fastify/formbody'
-import { WebClient } from '@slack/web-api'
-import moment from 'moment-timezone'
 
 // local utils
 import { evalCallback } from './utils/evalCallback.js'
+import { createTimestamp } from './utils/createTimestamp.js'
+import { fetchSlackUser } from './utils/fetchSlackUser.js'
+import { submitMsg } from './utils/submitMsg.js'
+import { updateUserStatus } from './utils/updateUserStatus.js'
 
 //
 dotenv.config()
@@ -22,64 +24,25 @@ fastify.register(formbody)
  */
 fastify.post('/', async (request, reply) => {
   const payloadFromSlack = JSON.parse(decodeURIComponent(request.body.payload))
-  console.log(`Fetching data from user ${payloadFromSlack.user.id}`)
 
-  // identifier for which shortcut was used
+  const userId = payloadFromSlack.user.id
   const callbackId = payloadFromSlack.callback_id
+  const timeStamp = createTimestamp()
+  const slackUser = await fetchSlackUser(userId)
 
-  // calc time, convert to correct timezone before pushing to log
-  const today = new Date()
-  const timeStamp = moment.tz(today, 'Asia/Taipei').toLocaleString()
+  if (slackUser) {
+    const submitToSlack = await submitMsg(
+      slackUser,
+      evalCallback(callbackId),
+      timeStamp
+    )
 
-  console.log({
-    timezoneConversion: {
-      server: today.toLocaleString(),
-      moment: timeStamp,
-    },
-  })
-
-  // Initialize slack bot
-  const slack = new WebClient(process.env.SLACK_BOT_TOKEN)
-  let slackUser = ''
-
-  // fetch data of the user that used the shortcut
-  try {
-    const result = await slack.users.profile.get({
-      user: payloadFromSlack.user.id,
-    })
-
-    console.log({
-      userName: result.profile.real_name,
-      callback: callbackId,
-      timeStamp: timeStamp,
-    })
-
-    slackUser = result.profile.real_name
-
-    //
-  } catch (error) {
-    console.error(error)
-  }
-
-  // actually submit a msg to the channel
-  try {
-    let commandContext = evalCallback(callbackId)
-    console.log(commandContext)
-
-    const result = await slack.chat.postMessage({
-      channel: process.env.SLACK_CHANNEL_ID,
-      text: `${slackUser} has ${commandContext} @ ${timeStamp}`,
-    })
-
-    if (result.ok) {
-      console.log(`${slackUser} has ${commandContext}`)
+    if (submitToSlack) {
+      await updateUserStatus(callbackId)
     }
-
-    //
-  } catch (error) {
-    console.error(error)
   }
 
+  //
   reply.send({
     slackUser: slackUser,
     callbackId: callbackId,
