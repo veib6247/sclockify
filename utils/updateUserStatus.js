@@ -18,7 +18,7 @@ export const updateUserStatus = async (callbackId) => {
       break
 
     case 'clock_out':
-      statusText = ''
+      statusText = 'Clocked out'
       statusEmoji = ':zzz:'
       break
 
