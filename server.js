@@ -1,9 +1,11 @@
-// Require the framework and instantiate it
 import Fastify from 'fastify'
 import * as dotenv from 'dotenv'
 import * as formbody from '@fastify/formbody'
 import { WebClient } from '@slack/web-api'
 import moment from 'moment-timezone'
+
+// local utils
+import { evalCallback } from './utils/evalCallback.js'
 
 //
 dotenv.config()
@@ -19,7 +21,6 @@ fastify.register(formbody)
  * Declare home route
  */
 fastify.post('/', async (request, reply) => {
-  // parse form to JSON
   const payloadFromSlack = JSON.parse(decodeURIComponent(request.body.payload))
   console.log(`Fetching data from user ${payloadFromSlack.user.id}`)
 
@@ -62,38 +63,8 @@ fastify.post('/', async (request, reply) => {
 
   // actually submit a msg to the channel
   try {
-    let commandContext = ''
-
-    // eval action
-    switch (callbackId) {
-      case 'clock_in':
-        commandContext = 'clocked in'
-        break
-
-      case 'clock_out':
-        commandContext = 'clocked out'
-        break
-
-      case 'break_15':
-        commandContext = 'taken a 15 minutes break'
-        break
-
-      case 'break_30':
-        commandContext = 'taken a 30 minutes break'
-        break
-
-      case 'lunch':
-        commandContext = 'taken a lunch break'
-        break
-
-      case 'extended_break':
-        commandContext = 'taken an extended break (1hr 30mins)'
-        break
-
-      default:
-        commandContext = 'broken the Space-Time Continuum'
-        break
-    }
+    let commandContext = evalCallback(callbackId)
+    console.log(commandContext)
 
     const result = await slack.chat.postMessage({
       channel: process.env.SLACK_CHANNEL_ID,
