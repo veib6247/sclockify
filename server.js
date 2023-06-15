@@ -117,20 +117,6 @@ fastify.post('/', async (request, reply) => {
 })
 
 /**
- * 2nd route
- */
-fastify.post('/command', async (request, reply) => {
-  const logBlob = {
-    user: request.body.user_id,
-    command: request.body.command,
-    text: request.body.text,
-  }
-
-  console.log(logBlob)
-  reply.send(logBlob)
-})
-
-/**
  * Run the server!
  */
 const start = async () => {
@@ -145,9 +131,13 @@ const start = async () => {
         port: process.env.PORT,
       })
     }
+
+    //
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
+
+    //
   } finally {
     console.log(`Server running in ${process.env.NODE_ENV} mode`)
   }
